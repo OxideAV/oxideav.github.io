@@ -1,0 +1,14 @@
+title: OxideAV
+description: Pure-Rust media transcoding and streaming — no C libraries, no FFI, no *-sys crates.
+theme: jekyll-theme-minimal
+url: "https://oxideav.github.io"
+
+show_downloads: false
+github:
+  owner_url: https://github.com/OxideAV
+  repository_url: https://github.com/OxideAV/oxideav-workspace
+  repository_nwo: OxideAV/oxideav-workspace
+
+markdown: kramdown
+plugins:
+  - jekyll-seo-tag
