@@ -31,6 +31,48 @@ oxideav = "0.0"
 Full workspace, CLI, and reference player live in
 [`oxideav-workspace`](https://github.com/OxideAV/oxideav-workspace).
 
+### Just one codec?
+
+Every codec is its own crate with a minimal footprint — pull only what
+you need, without containers, pipelines, or the CLI. The only
+infrastructure you need is `oxideav-core` (types) and `oxideav-codec`
+(traits + registry):
+
+```toml
+[dependencies]
+oxideav-core = "0.0"
+oxideav-codec = "0.0"
+oxideav-g711 = "0.0"     # or any other codec crate
+```
+
+```rust
+use oxideav_codec::CodecRegistry;
+use oxideav_core::{CodecId, CodecParameters, Frame, Packet, TimeBase};
+
+let mut reg = CodecRegistry::new();
+oxideav_g711::register(&mut reg);
+
+let mut params = CodecParameters::audio(CodecId::new("pcm_mulaw"));
+params.sample_rate = Some(8_000);
+params.channels = Some(1);
+
+let mut dec = reg.make_decoder(&params)?;
+dec.send_packet(&Packet::new(0, TimeBase::new(1, 8_000), encoded_bytes))?;
+let Frame::Audio(a) = dec.receive_frame()? else { unreachable!() };
+// a.data[0] is S16 PCM
+```
+
+Each codec crate's README has a concrete example tailored to its own
+payload shape (see
+[`oxideav-g711`](https://github.com/OxideAV/oxideav-g711),
+[`oxideav-gsm`](https://github.com/OxideAV/oxideav-gsm),
+[`oxideav-mp1`](https://github.com/OxideAV/oxideav-mp1),
+[`oxideav-g728`](https://github.com/OxideAV/oxideav-g728),
+[`oxideav-gif`](https://github.com/OxideAV/oxideav-gif), …). The
+canonical walkthrough of the `send_packet` / `receive_frame` /
+`flush` / `reset` loop lives in
+[`oxideav-codec`'s README](https://github.com/OxideAV/oxideav-codec).
+
 ## Architecture
 
 OxideAV is a modular framework, shipped as ~55 small crates that each
